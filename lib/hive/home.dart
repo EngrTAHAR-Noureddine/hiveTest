@@ -3,12 +3,22 @@ import 'package:clovertest/hive/models/Task.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
+import 'models/User.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
+  const HomePage({Key? key}) : super(key: key);
 
-  HomePage({Key? key}) : super(key: key);
+  @override
+  State<StatefulWidget> createState() => _HomePage();
+
+}
+
+class _HomePage extends State {
 
 
+  final TextEditingController _oneController = TextEditingController();
+  final TextEditingController _twoController = TextEditingController();
+  String boxStr = "user3";
 
   @override
   Widget build(BuildContext context) {
@@ -21,17 +31,74 @@ class HomePage extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: (){
           HiveController hiveController = HiveController();
-          hiveController.addTask();
+
+/*
+
+          Task task = Task(title: _oneController.text , desc: _twoController.text);
+          if(_twoController.text.isEmpty) task.desc = null;
+
+          hiveController.addTask(boxStr,task ,() {
+
+            setState(() {
+
+            });
+          });
+
+*/
+
+
+          User user = User(name: _oneController.text , familyname: _twoController.text);
+          if(_oneController.text.isEmpty) user.name = null;
+
+          hiveController.addUser(boxStr,user ,() {
+
+            setState(() {
+
+            });
+          });
+
+          _oneController.clear();
+          _twoController.clear();
         },
         child: const Icon(Icons.add , color: Colors.white,),
       ),
+
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: Row(
+          children: [
+
+            Expanded(
+              child: TextField(
+                controller: _oneController,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Title',
+                ),
+              ),
+            ),
+            const SizedBox(width: 10, height: 10,),
+            Expanded(
+              child: TextField(
+                controller: _twoController,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Desc',
+                ),
+              ),
+            ),
+
+          ],
+        ),
+      ),
+
       body: Column(
         children: [
           Expanded(
               child: Container(
                 color: Colors.white54,
                 child: StreamBuilder(
-                  stream: Hive.box('tasks').watch(),
+                  stream: Hive.box('tasks1').watch(),
                   builder: (context, snapshot){
                     if(snapshot.hasData && snapshot.data!=null){
                       // if you use BoxSettings -> the value of boxEvent is the same of darkMode (true or false)
@@ -69,33 +136,26 @@ class HomePage extends StatelessWidget {
                     color: (darkmode)? Colors.white38 : Colors.greenAccent,
 
                     child:  Center(
-                      child: ValueListenableBuilder(
-                        valueListenable: Hive.box('tasks').listenable(),
-                        builder: (context, box, widget) {
-                          if(box != null){
+                      child: ListView.builder(
+                        itemCount: Hive.box(boxStr).length,
+                        itemBuilder: (context, index){
+                          var boxUsers= Hive.box(boxStr);
+                          return ListTile(
+                            title:  /* Text(boxUsers.getAt(index).title.toString()),*/ Text(boxUsers.getAt(index).name.toString()),
+                            subtitle: /*Text(boxUsers.getAt(index).desc.toString()), */ Text(boxUsers.getAt(index).familyname.toString()),
+                            onTap: (){
+                              HiveController hiveController = HiveController();
+                              hiveController.onClearBox(boxStr,() {
 
-                            Box myBox = box as Box;
+                                setState(() {
 
-                            return ListView.builder(
-                              itemCount: myBox.length,
-                              itemBuilder: (context, index){
-
-                                return ListTile(
-                                  title: Text(myBox.getAt(index).title),
-                                  subtitle: Text(myBox.getAt(index).desc),
-                                  onTap: (){},
-                                );
-                              },
-
-                            );
-                          }else{
-                            return const CircularProgressIndicator();
-                          }
-
-
-
+                                });
+                              });
+                            },
+                          );
                         },
-                      ),
+
+                      )
 
                     ),
                   );

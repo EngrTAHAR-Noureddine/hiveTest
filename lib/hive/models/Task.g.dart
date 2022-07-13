@@ -25,12 +25,16 @@ class TaskAdapter extends TypeAdapter<Task> {
 
   @override
   void write(BinaryWriter writer, Task obj) {
+
+    String y = obj.desc??"hello";
+    print("y is: $y");
+
     writer
       ..writeByte(3)
       ..writeByte(0)
       ..write(obj.title)
       ..writeByte(1)
-      ..write(obj.desc)
+      ..write(y)
       ..writeByte(2)
       ..write(obj.index);
   }

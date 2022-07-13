@@ -2,6 +2,8 @@ import 'package:clovertest/hive/models/Task.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
+import '../models/User.dart';
+
 class HiveController{
 
   openningHiveBox()async{
@@ -18,10 +20,10 @@ class HiveController{
 
   }
 
-  addTask()async{
-    Box boxTasks = await Hive.openBox('tasks');
+  addTask(String box,Task task,Function f)async{
+    Box boxTasks = Hive.box(box);
 
-    Box boxSettings = await Hive.openBox('settings');
+    Box boxSettings = Hive.box('settings');
 
     bool? darkmode = boxSettings.get('darkMode');
     if(darkmode != null){
@@ -34,24 +36,25 @@ class HiveController{
 
     int l = boxTasks.length;
     if(l.isNaN) l = 0;
-/*
+
       // add task
 
-    Task task = Task(title: "title ${l+1}", desc: "task registered",index: l+1);
+   task.index = l+1;
 
     boxTasks.add(task);
 
     task.save();
-*/
 
+    f();
 
+    /*
     // update a task
     Task t1 = boxTasks.getAt(0);
 
     t1.title  = "${t1.title} -";
     t1.save();
 
-    /*
+
     //delete item
     if (kDebugMode) {
       print('length is $l');
@@ -66,6 +69,20 @@ class HiveController{
   }
 
 
+  addUser(String box, User user ,Function f)async{
+    Box boxUsers = Hive.box(box);
+
+    boxUsers.add(user);
+
+    user.save();
+    f();
+  }
+
+  onClearBox(String box,Function f)async{
+    Box boxUsers = Hive.box(box);
+    boxUsers.clear();
+    f();
+  }
 
 
 
